@@ -150,16 +150,33 @@ impl<C: GKRConfig> Circuit<C> {
     pub fn load_witness_file(&mut self, filename: &str) {
         // note that, for data parallel, one should load multiple witnesses into different slot in the vectorized F
         let file_bytes = fs::read(filename).unwrap();
-        self.load_witness_bytes(&file_bytes);
+        self.load_witness_bytes(&file_bytes).unwrap();
     }
-    pub fn load_witness_bytes(&mut self, file_bytes: &[u8]) {
+    pub fn load_witness_bytes(
+        &mut self,
+        file_bytes: &[u8],
+    ) -> std::result::Result<(), std::io::Error> {
         log::trace!("witness file size: {} bytes", file_bytes.len());
         log::trace!("expecting: {} bytes", 32 * (1 << self.log_input_size()));
+        if file_bytes.len() != 32 * (1 << self.log_input_size()) {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                "Invalid witness file size",
+            ));
+        }
 
         let mut cursor = Cursor::new(file_bytes);
-        self.layers[0].input_vals.evals = (0..(1 << self.log_input_size()))
-            .map(|_| C::Field::deserialize_from_ecc_format(&mut cursor))
-            .collect();
+        let mut evals = vec![];
+        for _ in 0..(1 << self.log_input_size()) {
+            evals.push(
+                match C::Field::try_deserialize_from_ecc_format(&mut cursor) {
+                    Ok(v) => v,
+                    Err(e) => return Err(e),
+                },
+            );
+        }
+        self.layers[0].input_vals.evals = evals;
+        Ok(())
     }
 }
 impl<C: GKRConfig> Segment<C> {
@@ -353,8 +370,6 @@ impl<C: GKRConfig> RecursiveCircuit<C> {
 
             ret.layers.push(layer_id);
         }
-        // TODO: configure sentinel (currently it is manually handled as sentinel is unknown before loading)
-        // assert_eq!(file_bytes.len(), cur + 32);
         ret
     }
 

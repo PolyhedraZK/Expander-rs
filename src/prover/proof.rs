@@ -55,4 +55,13 @@ impl FieldSerde for Proof {
     fn deserialize_from_ecc_format<R: Read>(_reader: R) -> Self {
         unimplemented!("not implemented for Proof")
     }
+
+    fn try_deserialize_from_ecc_format<R: Read>(
+        _reader: R,
+    ) -> std::result::Result<Self, std::io::Error>
+    where
+        Self: Sized,
+    {
+        unimplemented!("not implemented for Proof")
+    }
 }

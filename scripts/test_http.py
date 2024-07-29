@@ -28,7 +28,7 @@ if __name__ == '__main__':
     }
     response = requests.post(url+"/verify", headers=verify_headers, data=verifier_input)
     print(response)
-    # check 200
+    # check success message
     assert response.text == "success", f"Failed to verify proof: {response.text}"
     print("Proof verified successfully")
     
@@ -40,6 +40,17 @@ if __name__ == '__main__':
     tempered_proof = proof[:random_byte_index] + bytes([proof[random_byte_index] ^ (1 << random_bit_index)]) + proof[random_byte_index+1:]
     tempered_input = witness_len + proof_len + witness + tempered_proof
     response = requests.post(url+"/verify", headers=verify_headers, data=tempered_input)
-    # check 400
-    assert response.text != "success", f"Failed to detect tempered proof: {response.text}"
+    # check failure message
+    assert response.text == "failure", f"Failed to detect tempered proof: {response.text}"
     print("Tempered proof detected successfully")
+
+    # try prove using witness with invalid length
+    tempered_witness = witness[:-1]
+    prove_headers = {
+        'Content-Type': 'application/octet-stream',
+        'Content-Length': str(len(tempered_witness)),
+    }
+    response = requests.post(url+"/prove", headers=prove_headers, data=tempered_witness)
+    # check 400
+    assert response.status_code == 400, f"Failed to detect invalid witness length: {response.text}"
+    print("Invalid witness length detected successfully")
