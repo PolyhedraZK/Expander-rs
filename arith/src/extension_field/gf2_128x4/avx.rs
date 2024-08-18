@@ -385,12 +385,18 @@ impl From<GF2_128> for AVX512GF2_128x4 {
 }
 
 impl SimdField for AVX512GF2_128x4 {
+    type Scalar = GF2_128;
+
+    fn from_scalar_array(_scalars: &[Self::Scalar]) -> Self {
+        // Note: We don't necessarily need this function
+        unimplemented!()
+    }
+
     #[inline(always)]
     fn scale(&self, challenge: &Self::Scalar) -> Self {
         let simd_challenge = AVX512GF2_128x4::from(*challenge);
         *self * simd_challenge
     }
-    type Scalar = GF2_128;
 }
 
 #[inline(always)]

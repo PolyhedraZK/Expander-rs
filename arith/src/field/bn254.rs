@@ -102,6 +102,10 @@ impl Field for Fr {
 impl SimdField for Fr {
     type Scalar = Self;
 
+    fn from_scalar_array(scalars: &[Self::Scalar]) -> Self {
+        scalars[0]
+    }
+
     #[inline(always)]
     fn scale(&self, challenge: &Self::Scalar) -> Self {
         self * challenge

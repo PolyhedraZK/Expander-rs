@@ -173,6 +173,11 @@ impl Field for NeonGF2_128x4 {
 impl SimdField for NeonGF2_128x4 {
     type Scalar = NeonGF2_128;
 
+    fn from_scalar_array(_scalars: &[Self::Scalar]) -> Self {
+        // Note: We don't necessarily need this function
+        unimplemented!()
+    }
+
     #[inline(always)]
     fn scale(&self, challenge: &Self::Scalar) -> Self {
         NeonGF2_128x4 {

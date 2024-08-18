@@ -257,6 +257,22 @@ impl From<GF2> for GF2x8 {
 }
 
 impl SimdField for GF2x8 {
+    type Scalar = crate::GF2;
+
+    /// The first bit in `scalars` goes into the most significant place
+    fn from_scalar_array(scalars: &[Self::Scalar]) -> Self {
+        assert!(scalars.len() == 8);
+        let v = scalars
+            .iter()
+            .rev()
+            .enumerate()
+            .map(|(i, s)| s.v << i)
+            .reduce(|a, b| a | b)
+            .unwrap();
+
+        Self { v }
+    }
+
     fn scale(&self, challenge: &Self::Scalar) -> Self {
         if challenge.v == 0 {
             Self::zero()
@@ -264,6 +280,4 @@ impl SimdField for GF2x8 {
             *self
         }
     }
-
-    type Scalar = crate::GF2;
 }

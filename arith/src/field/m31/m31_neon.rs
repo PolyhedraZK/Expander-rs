@@ -21,7 +21,7 @@ fn reduce_sum(x: uint32x4_t) -> uint32x4_t {
     unsafe { vminq_u32(x, vsubq_u32(x, PACKED_MOD)) }
 }
 
-/// NeonM31 packs 8 M31 elements and operates on them in parallel
+/// NeonM31 packs 16 M31 elements and operates on them in parallel
 #[derive(Clone, Copy)]
 pub struct NeonM31 {
     pub v: [uint32x4_t; 4],
@@ -288,6 +288,15 @@ impl Field for NeonM31 {
 
 impl SimdField for NeonM31 {
     type Scalar = M31;
+
+    fn from_scalar_array(scalars: &[Self::Scalar]) -> Self {
+        assert!(scalars.len() == 16);
+        let v: [Self::Scalar; 16] = scalars.try_into().unwrap();
+
+        Self {
+            v: unsafe { transmute(v) },
+        }
+    }
 
     #[inline]
     fn scale(&self, challenge: &Self::Scalar) -> Self {
