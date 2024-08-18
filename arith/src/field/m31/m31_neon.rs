@@ -296,7 +296,7 @@ impl SimdField for NeonM31 {
         let v: [Self::Scalar; Self::SIMD_SIZE] = scalars.try_into().unwrap();
 
         Self {
-            v: unsafe { transmute(v) },
+            v: unsafe { transmute::<[Self::Scalar; Self::SIMD_SIZE], [uint32x4_t; 4]>(v) },
         }
     }
 

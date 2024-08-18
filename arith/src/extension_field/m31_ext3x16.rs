@@ -70,7 +70,7 @@ impl SimdField for M31Ext3x16 {
                     &scalars
                         .iter()
                         .map(|scalar| scalar.v[i])
-                        .collect::<Vec<M31>>()
+                        .collect::<Vec<M31>>(),
                 )
             })
             .collect();

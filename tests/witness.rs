@@ -1,7 +1,7 @@
-use std::fs;
+use arith::{Field, FieldSerde, SimdField};
 use expander_rs::{Circuit, GKRConfig, M31ExtConfig};
-use arith::{Field, SimdField, FieldSerde};
 use halo2curves::pasta::pallas::Scalar;
+use std::fs;
 use std::io::Cursor;
 
 /// READ Sequential witness and pack them into simd
@@ -17,11 +17,16 @@ fn test_helper<C: GKRConfig>() {
     let witness_bytes = fs::read(WITNESS_FILE).unwrap(); // does this use buffer?
 
     assert!(witness_bytes.len() == nb_field_elements * 256 / 8); // we seem to be using 256 bits for a field anyway
-    
+
     let mut cursor = Cursor::new(witness_bytes);
     let mut witness_field: Vec<<C::SimdCircuitField as SimdField>::Scalar> = vec![];
     for _ in 0..nb_field_elements {
-        witness_field.push(<C::SimdCircuitField as SimdField>::Scalar::try_deserialize_from_ecc_format(&mut cursor).unwrap());
+        witness_field.push(
+            <C::SimdCircuitField as SimdField>::Scalar::try_deserialize_from_ecc_format(
+                &mut cursor,
+            )
+            .unwrap(),
+        );
     }
 
     let mut input = &mut circuit.layers[0].input_vals;
@@ -34,5 +39,4 @@ fn test_helper<C: GKRConfig>() {
         }
         input.push(C::SimdCircuitField::from_scalar_array(&input_i));
     }
-
 }

@@ -237,7 +237,7 @@ impl SimdField for AVXM31 {
         let v: [Self::Scalar; Self::SIMD_SIZE] = scalars.try_into().unwrap();
 
         Self {
-            v: unsafe { transmute(v) },
+            v: unsafe { transmute::<[Self::Scalar; Self::SIMD_SIZE], __m512i>(v) },
         }
     }
 
