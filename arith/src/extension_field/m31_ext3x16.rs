@@ -60,6 +60,8 @@ impl FieldSerde for M31Ext3x16 {
 impl SimdField for M31Ext3x16 {
     type Scalar = M31Ext3;
 
+    const SIMD_SIZE: usize = 16;
+
     fn from_scalar_array(scalars: &[Self::Scalar]) -> Self {
         // We don't necessarily need this function
         let v: Vec<M31x16> = (0..3)

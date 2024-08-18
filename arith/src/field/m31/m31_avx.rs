@@ -230,9 +230,11 @@ impl Field for AVXM31 {
 impl SimdField for AVXM31 {
     type Scalar = M31;
 
+    const SIMD_SIZE: usize = 16;
+
     fn from_scalar_array(scalars: &[Self::Scalar]) -> Self {
-        assert!(scalars.len() == 16);
-        let v: [Self::Scalar; 16] = scalars.try_into().unwrap();
+        assert!(scalars.len() == Self::SIMD_SIZE);
+        let v: [Self::Scalar; Self::SIMD_SIZE] = scalars.try_into().unwrap();
 
         Self {
             v: unsafe { transmute(v) },

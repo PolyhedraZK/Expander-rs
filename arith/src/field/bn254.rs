@@ -102,6 +102,8 @@ impl Field for Fr {
 impl SimdField for Fr {
     type Scalar = Self;
 
+    const SIMD_SIZE: usize = 1;
+
     fn from_scalar_array(scalars: &[Self::Scalar]) -> Self {
         scalars[0]
     }

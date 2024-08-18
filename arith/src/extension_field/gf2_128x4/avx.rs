@@ -387,6 +387,8 @@ impl From<GF2_128> for AVX512GF2_128x4 {
 impl SimdField for AVX512GF2_128x4 {
     type Scalar = GF2_128;
 
+    const SIMD_SIZE: usize = 4;
+
     fn from_scalar_array(_scalars: &[Self::Scalar]) -> Self {
         // Note: We don't necessarily need this function
         unimplemented!()

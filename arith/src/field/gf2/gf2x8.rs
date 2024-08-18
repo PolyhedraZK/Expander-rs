@@ -259,9 +259,11 @@ impl From<GF2> for GF2x8 {
 impl SimdField for GF2x8 {
     type Scalar = crate::GF2;
 
+    const SIMD_SIZE: usize = 8;
+
     /// The first bit in `scalars` goes into the most significant place
     fn from_scalar_array(scalars: &[Self::Scalar]) -> Self {
-        assert!(scalars.len() == 8);
+        assert!(scalars.len() == Self::SIMD_SIZE);
         let v = scalars
             .iter()
             .rev()
