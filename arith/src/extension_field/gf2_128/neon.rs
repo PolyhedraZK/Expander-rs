@@ -63,13 +63,7 @@ impl FieldSerde for NeonGF2_128 {
     where
         Self: Sized,
     {
-        let mut u = [0u8; 32];
-        reader.read_exact(&mut u)?;
-        Ok(unsafe {
-            NeonGF2_128 {
-                v: transmute::<[u8; 16], uint32x4_t>(u[..16].try_into().unwrap()),
-            }
-        })
+        unimplemented!()
     }
 }
 

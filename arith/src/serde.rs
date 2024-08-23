@@ -46,3 +46,32 @@ impl FieldSerde for u64 {
         unimplemented!("not implemented for u64")
     }
 }
+
+impl<T: FieldSerde + std::fmt::Debug, const N: usize> FieldSerde for [T; N] {
+    fn serialize_into<W: Write>(&self, mut writer: W) {
+        for item in self {
+            item.serialize_into(&mut writer);
+        }
+    }
+
+    fn serialized_size() -> usize {
+        T::serialized_size() * N
+    }
+
+    fn deserialize_from<R: Read>(mut reader: R) -> Self {
+        let mut ret = Vec::<T>::new();
+        for _ in 0..N {
+            ret.push(T::deserialize_from(&mut reader));
+        }
+        ret.try_into().unwrap()
+    }
+    
+    fn try_deserialize_from_ecc_format<R: Read>(
+        _reader: R,
+    ) -> std::result::Result<Self, std::io::Error>
+    where
+        Self: Sized {
+            unimplemented!("not implemented for array")
+        }
+    
+}

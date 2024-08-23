@@ -47,13 +47,7 @@ impl FieldSerde for AVX512GF2_128 {
     where
         Self: Sized,
     {
-        let mut u = [0u8; 32];
-        reader.read_exact(&mut u)?;
-        Ok(unsafe {
-            AVX512GF2_128 {
-                v: transmute::<[u8; 16], __m128i>(u[..16].try_into().unwrap()),
-            }
-        })
+        unimplemented!()
     }
 }
 

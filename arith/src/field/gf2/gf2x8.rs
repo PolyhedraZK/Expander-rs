@@ -35,9 +35,7 @@ impl FieldSerde for GF2x8 {
     where
         Self: Sized,
     {
-        let mut u = [0u8; 32];
-        reader.read_exact(&mut u)?;
-        Ok(GF2x8 { v: u[0] })
+        unimplemented!()
     }
 }
 

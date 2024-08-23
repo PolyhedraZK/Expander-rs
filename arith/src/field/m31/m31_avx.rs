@@ -69,15 +69,7 @@ impl FieldSerde for AVXM31 {
     where
         Self: Sized,
     {
-        let mut buf = [0u8; 32];
-        reader.read_exact(&mut buf)?;
-        assert!(
-            buf.iter().skip(4).all(|&x| x == 0),
-            "non-zero byte found in witness byte"
-        );
-        Ok(Self::pack_full(
-            u32::from_le_bytes(buf[..4].try_into().unwrap()).into(),
-        ))
+        unimplemented!()
     }
 }
 

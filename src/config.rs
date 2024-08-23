@@ -141,6 +141,8 @@ pub trait GKRConfig: Default + Clone + Send + Sync + 'static {
 
     fn circuit_field_to_simd_circuit_field(a: &Self::CircuitField) -> Self::SimdCircuitField;
 
+    fn simd_circuit_field_from_circuit_field_array(a: &[Self::CircuitField]) -> Self::SimdCircuitField;
+
     fn simd_circuit_field_into_field(a: &Self::SimdCircuitField) -> Self::Field;
 
     fn simd_circuit_field_mul_challenge_field(
@@ -219,6 +221,11 @@ impl GKRConfig for M31ExtConfig {
     }
 
     #[inline(always)]
+    fn simd_circuit_field_from_circuit_field_array(a: &[Self::CircuitField]) -> Self::SimdCircuitField {
+        Self::SimdCircuitField::from_scalar_array(a)
+    }
+
+    #[inline(always)]
     fn simd_circuit_field_into_field(a: &Self::SimdCircuitField) -> Self::Field {
         Self::Field::from(*a)
     }
@@ -289,6 +296,11 @@ impl GKRConfig for BN254Config {
     #[inline(always)]
     fn circuit_field_into_field(a: &Self::CircuitField) -> Self::Field {
         *a
+    }
+
+    #[inline(always)]
+    fn simd_circuit_field_from_circuit_field_array(a: &[Self::CircuitField]) -> Self::SimdCircuitField {
+        a[0]
     }
 
     #[inline(always)]

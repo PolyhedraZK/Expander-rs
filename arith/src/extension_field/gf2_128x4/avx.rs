@@ -54,12 +54,7 @@ impl FieldSerde for AVX512GF2_128x4 {
     where
         Self: Sized,
     {
-        let mut buf = [0u8; 32];
-        reader.read_exact(&mut buf)?;
-        let data: __m128i = unsafe { _mm_loadu_si128(buf.as_ptr() as *const __m128i) };
-        Ok(Self {
-            data: Self::pack_full(data),
-        })
+        unimplemented!()
     }
 }
 const PACKED_0: __m512i = unsafe { transmute([0; 16]) };
