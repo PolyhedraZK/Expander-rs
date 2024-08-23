@@ -324,10 +324,10 @@ impl<'a, C: GKRConfig> SumcheckGkrHelper<'a, C> {
             gate_exists[g.i_ids[0]] = true;
         }
         for g in add.iter() {
-            hg_vals[g.i_ids[0]] += C::Field::from(C::challenge_mul_circuit_field(
-                &eq_evals_at_rz0[g.o_id],
+            hg_vals[g.i_ids[0]] += C::simd_circuit_field_mul_challenge_field(
                 &g.coef,
-            ));
+                &eq_evals_at_rz0[g.o_id],
+            );
             gate_exists[g.i_ids[0]] = true;
         }
     }
@@ -357,12 +357,11 @@ impl<'a, C: GKRConfig> SumcheckGkrHelper<'a, C> {
         );
 
         for g in mul.iter() {
-            hg_vals[g.i_ids[1]] += v_rx.scale(
-                &(C::challenge_mul_circuit_field(
-                    &(eq_evals_at_rz0[g.o_id] * eq_evals_at_rx[g.i_ids[0]]),
+            hg_vals[g.i_ids[1]] += v_rx * 
+                C::simd_circuit_field_mul_challenge_field(
                     &g.coef,
-                )),
-            );
+                    &(eq_evals_at_rz0[g.o_id] * eq_evals_at_rx[g.i_ids[0]]),
+                );
             gate_exists[g.i_ids[1]] = true;
         }
     }
