@@ -216,7 +216,7 @@ impl SumcheckMultilinearProdSimdVarHelper {
         bk_f: &mut [C::ChallengeField],
         bk_hg: &mut [C::ChallengeField],
     ) -> [C::ChallengeField; 4] {
-        assert_eq!(degree, 2);
+        assert_eq!(degree, 3);
         let mut p0 = C::ChallengeField::zero();
         let mut p1 = C::ChallengeField::zero();
         let mut p2 = C::ChallengeField::zero();
@@ -395,7 +395,7 @@ impl<'a, C: GKRConfig> SumcheckGkrHelper<'a, C> {
         var_idx: usize,
         degree: usize,
     ) -> [C::ChallengeField; 3] {
-        debug_assert!(var_idx < self.input_var_num);
+        assert!(var_idx < self.input_var_num);
         let [p0, p1, p2] = self.xy_helper.poly_eval_at::<C>(
             var_idx,
             degree,
@@ -416,8 +416,8 @@ impl<'a, C: GKRConfig> SumcheckGkrHelper<'a, C> {
         var_idx: usize,
         degree: usize,
     ) -> [C::ChallengeField; 4] {
-        debug_assert_eq!(degree, 3);
-        debug_assert!(var_idx < self.simd_var_num);
+        assert_eq!(degree, 3);
+        assert!(var_idx < self.simd_var_num);
         self.simd_var_helper.poly_eval_at::<C>(
             var_idx,
             degree,

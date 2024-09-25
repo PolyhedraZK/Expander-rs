@@ -1,8 +1,8 @@
-use expander_rs::{utils::*, FieldType};
+use expander_rs::{utils::*, BabyBearExt3ConfigKeccak, BabyBearExt4ConfigKeccak, FieldType};
 use expander_rs::{
-    BN254ConfigKeccak, BN254ConfigSha2, Circuit, CircuitLayer, Config, GF2ExtConfigKeccak,
-    GF2ExtConfigSha2, GKRConfig, GKRScheme, GateAdd, GateMul, M31ExtConfigKeccak, M31ExtConfigSha2,
-    Prover, Verifier,
+    BN254ConfigKeccak, BN254ConfigSha2, BabyBearExt3ConfigSha2, BabyBearExt4ConfigSha2, Circuit,
+    CircuitLayer, Config, GF2ExtConfigKeccak, GF2ExtConfigSha2, GKRConfig, GKRScheme, GateAdd,
+    GateMul, M31ExtConfigKeccak, M31ExtConfigSha2, Prover, Verifier,
 };
 use std::panic;
 use std::panic::AssertUnwindSafe;
@@ -51,6 +51,18 @@ fn gen_simple_circuit<C: GKRConfig>() -> Circuit<C> {
 
 #[test]
 fn test_gkr_correctness() {
+    test_gkr_correctness_helper::<BabyBearExt3ConfigSha2>(&Config::<BabyBearExt3ConfigSha2>::new(
+        GKRScheme::Vanilla,
+    ));
+    test_gkr_correctness_helper::<BabyBearExt4ConfigSha2>(&Config::<BabyBearExt4ConfigSha2>::new(
+        GKRScheme::Vanilla,
+    ));
+    test_gkr_correctness_helper::<BabyBearExt4ConfigKeccak>(
+        &Config::<BabyBearExt4ConfigKeccak>::new(GKRScheme::Vanilla),
+    );
+    test_gkr_correctness_helper::<BabyBearExt3ConfigKeccak>(
+        &Config::<BabyBearExt3ConfigKeccak>::new(GKRScheme::Vanilla),
+    );
     test_gkr_correctness_helper::<GF2ExtConfigSha2>(&Config::<GF2ExtConfigSha2>::new(
         GKRScheme::Vanilla,
     ));
@@ -76,6 +88,7 @@ fn test_gkr_correctness_helper<C: GKRConfig>(config: &Config<C>) {
     println!("============== start ===============");
     println!("Field Type: {:?}", C::FIELD_TYPE);
     let circuit_copy_size: usize = match C::FIELD_TYPE {
+        FieldType::BabyBear => 2,
         FieldType::GF2 => 1,
         FieldType::M31 => 2,
         FieldType::BN254 => 2,
@@ -89,7 +102,7 @@ fn test_gkr_correctness_helper<C: GKRConfig>(config: &Config<C>) {
     println!("Config created.");
     let circuit_path = match C::FIELD_TYPE {
         FieldType::GF2 => KECCAK_GF2_CIRCUIT,
-        _ => KECCAK_M31_CIRCUIT, // Use this for both M31 and BN254-Fr
+        _ => KECCAK_M31_CIRCUIT, // Use this for BabyBear, M31 and BN254-Fr
     };
 
     let mut circuit = Circuit::<C>::load_circuit(circuit_path);

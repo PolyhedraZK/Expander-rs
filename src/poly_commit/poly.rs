@@ -8,8 +8,8 @@ pub struct MultiLinearPoly {}
 
 impl MultiLinearPoly {
     pub fn eval_generic<F: Field>(evals: &[F], x: &[F], scratch: &mut [F]) -> F {
-        debug_assert_eq!(1 << x.len(), evals.len());
-        debug_assert_eq!(evals.len(), scratch.len());
+        assert_eq!(1 << x.len(), evals.len());
+        assert_eq!(evals.len(), scratch.len());
 
         if x.is_empty() {
             evals[0]

@@ -7,7 +7,7 @@ fn transcript_io<C: GKRConfig>(
     ps: &[C::ChallengeField],
     transcript: &mut Transcript<C::FiatShamirHashType>,
 ) -> C::ChallengeField {
-    debug_assert!(ps.len() == 3 || ps.len() == 4); // 3 for x, y; 4 for simd var
+    assert!(ps.len() == 3 || ps.len() == 4); // 3 for x, y; 4 for simd var
     for p in ps {
         transcript.append_challenge_f::<C>(p);
     }
@@ -44,7 +44,7 @@ pub fn sumcheck_prove_gkr_layer<C: GKRConfig>(
 
     helper.prepare_simd_var_vals();
     for i_var in 0..helper.simd_var_num {
-        let evals = helper.poly_evals_at_r_simd_var(i_var, 2);
+        let evals = helper.poly_evals_at_r_simd_var(i_var, 3);
         let r = transcript_io::<C>(&evals, transcript);
         helper.receive_r_simd_var(i_var, r);
     }

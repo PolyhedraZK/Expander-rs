@@ -6,6 +6,11 @@ default-run = "expander-rs" # default
 
 [dependencies]
 arith = { path = "arith" }
+babybear = { path = "arith/babybear" }
+gf2 = { path = "arith/gf2" }
+gf2_128 = { path = "arith/gf2_128" }
+mersenne31 = { path = "arith/mersenne31" }
+
 ark-std.workspace = true
 clap.workspace = true
 env_logger.workspace = true
@@ -35,13 +40,21 @@ name = "dev-setup"
 path = "src/utils.rs"
 
 [features]
+avx256 = [ "arith/avx256" ]
 default = []
 # default = [ "grinding" ]
 grinding = []
-avx256 = ["arith/avx256"]
 
 [workspace]
-members = ["arith", "bi-kzg"]
+members = [
+    "arith", # definitions of Field, Extensions, SIMDS
+    "arith/babybear",
+    "arith/gf2",    
+    "arith/gf2_128",
+    "arith/goldilocks",
+    "arith/mersenne31",
+    "bi-kzg"
+    ]
 
 [workspace.dependencies]
 ark-std = "0.4"
@@ -58,6 +71,10 @@ halo2curves = { git = "https://github.com/PolyhedraZK/halo2curves", default-feat
 ] }
 itertools = "0.13"
 log = "0.4"
+p3-baby-bear = { git = "https://github.com/Plonky3/Plonky3.git", version = "0.1.0", features = ["nightly-features"] }
+p3-field = { git = "https://github.com/Plonky3/Plonky3.git", version = "0.1.0" }
+# This import should be unnecessary but p3-baby-bear fails to turn on "nightly-features" for this dependency
+p3-monty-31 = { git = "https://github.com/Plonky3/Plonky3.git", version = "0.1.0", features = ["nightly-features"] }
 rand = "0.8.5"
 rayon = "1.10"
 sha2 = "0.10.8"
@@ -69,14 +86,24 @@ thiserror = "1.0.63"
 ethnum = "1.5.0"
 
 [[bench]]
-name = "arith"
+name = "bn254_fr"
 harness = false
-path = "arith/benches/field.rs"
+path = "arith/benches/fr.rs"
 
 [[bench]]
-name = "arith-ext-by-base"
+name = "gf2"
 harness = false
-path = "arith/benches/ext_field.rs"
+path = "arith/gf2/benches/gf2.rs"
+
+[[bench]]
+name = "gf2_128"
+harness = false
+path = "arith/gf2_128/benches/gf2_128.rs"
+
+[[bench]]
+name = "m31"
+harness = false
+path = "arith/mersenne31/benches/m31.rs"
 
 [[bench]]
 name = "gkr-hashes"

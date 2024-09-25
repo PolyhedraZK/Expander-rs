@@ -128,8 +128,9 @@ unsafe impl<C> Send for Circuit<C> where C: GKRConfig {}
 
 impl<C: GKRConfig> Circuit<C> {
     pub fn load_circuit(filename: &str) -> Self {
-        let rc = RecursiveCircuit::<C>::load(filename).unwrap();
-        rc.flatten()
+        RecursiveCircuit::<C>::load(filename)
+            .unwrap_or_else(|_| panic!("Failed to load {}", filename))
+            .flatten()
     }
 
     pub fn log_input_size(&self) -> usize {

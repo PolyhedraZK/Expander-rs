@@ -63,7 +63,7 @@ cargo run --bin=dev-setup --release
 Command template:
 
 ```sh
-RUSTFLAGS="-C target-cpu=native" cargo run --release -- -f [fr|m31ext3] -t [#threads] -s [keccak|poseidon]
+RUSTFLAGS="-C target-cpu=native" cargo run --release -- -f [fr|m31ext3|babybearext3|babybearext4] -t [#threads] -s [keccak|poseidon]
 ```
 
 Concretely if you are running on a 16 physical core CPU for Bn256 scalar field:

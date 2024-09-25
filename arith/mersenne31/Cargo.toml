@@ -1,0 +1,20 @@
+[package]
+name = "mersenne31"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+arith = { path = "../" }
+
+ark-std.workspace = true
+ethnum.workspace = true
+rand.workspace = true
+
+
+[dev-dependencies]
+tynm.workspace = true
+criterion.workspace = true
+
+[[bench]]
+name = "m31"
+harness = false

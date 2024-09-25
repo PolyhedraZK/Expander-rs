@@ -66,7 +66,7 @@ impl<H: FiatShamirHash> Transcript<H> {
     #[inline]
     pub fn challenge_f<C: GKRConfig>(&mut self) -> C::ChallengeField {
         self.hash_to_digest();
-        debug_assert!(C::ChallengeField::SIZE <= Self::DIGEST_SIZE);
+        assert!(C::ChallengeField::SIZE <= Self::DIGEST_SIZE);
         C::ChallengeField::from_uniform_bytes(&self.digest.clone().try_into().unwrap())
     }
 
@@ -78,7 +78,7 @@ impl<H: FiatShamirHash> Transcript<H> {
     #[inline]
     pub fn circuit_f<C: GKRConfig>(&mut self) -> C::CircuitField {
         self.hash_to_digest();
-        debug_assert!(C::CircuitField::SIZE <= Self::DIGEST_SIZE);
+        assert!(C::CircuitField::SIZE <= Self::DIGEST_SIZE);
         C::CircuitField::from_uniform_bytes(&self.digest.clone().try_into().unwrap())
     }
 }

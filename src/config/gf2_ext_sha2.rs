@@ -1,4 +1,6 @@
-use arith::{ExtensionField, GF2_128x8, GF2x8, GF2, GF2_128};
+use arith::ExtensionField;
+use gf2::{GF2x8, GF2};
+use gf2_128::{GF2_128x8, GF2_128};
 
 use crate::SHA256hasher;
 

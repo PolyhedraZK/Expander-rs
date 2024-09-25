@@ -1,50 +1,12 @@
 use std::io::Cursor;
 
-use ark_std::{end_timer, start_timer, test_rng};
+use ark_std::{end_timer, start_timer};
 use rand::RngCore;
 
 use crate::{Field, FieldSerde};
 
-pub fn random_field_tests<F: Field + FieldSerde>(type_name: String) {
-    let mut rng = test_rng();
-
-    random_multiplication_tests::<F, _>(&mut rng, type_name.clone());
-    random_addition_tests::<F, _>(&mut rng, type_name.clone());
-    random_subtraction_tests::<F, _>(&mut rng, type_name.clone());
-    random_negation_tests::<F, _>(&mut rng, type_name.clone());
-    random_doubling_tests::<F, _>(&mut rng, type_name.clone());
-    random_squaring_tests::<F, _>(&mut rng, type_name.clone());
-    random_expansion_tests::<F, _>(&mut rng, type_name.clone()); // also serve as distributivity tests
-    random_serde_tests::<F, _>(&mut rng, type_name.clone());
-    associativity_tests::<F, _>(&mut rng, type_name.clone());
-    commutativity_tests::<F, _>(&mut rng, type_name.clone());
-    identity_tests::<F, _>(&mut rng, type_name.clone());
-    //inverse_tests::<F, _>(&mut rng, type_name.clone());
-
-    assert_eq!(F::zero().is_zero(), true);
-    {
-        let mut z = F::zero();
-        z = z.neg();
-        assert_eq!(z.is_zero(), true);
-    }
-
-    // Multiplication by zero
-    {
-        let mut a = F::random_unsafe(&mut rng);
-        a.mul_assign(&F::zero());
-        assert_eq!(a.is_zero(), true);
-    }
-
-    // Addition by zero
-    {
-        let mut a = F::random_unsafe(&mut rng);
-        let copy = a;
-        a.add_assign(&F::zero());
-        assert_eq!(a, copy);
-    }
-}
-
-fn commutativity_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
+#[allow(clippy::eq_op)]
+pub(crate) fn commutativity_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
     let _message = format!("commutativity {}", type_name);
     let start = start_timer!(|| _message);
     for _ in 0..1000 {
@@ -57,7 +19,7 @@ fn commutativity_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
     end_timer!(start);
 }
 
-fn identity_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
+pub(crate) fn identity_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
     let _message = format!("identity {}", type_name);
     let start = start_timer!(|| _message);
     for _ in 0..1000 {
@@ -74,7 +36,7 @@ fn identity_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
     end_timer!(start);
 }
 
-fn random_multiplication_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
+pub(crate) fn random_multiplication_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
     let _message = format!("multiplication {}", type_name);
     let start = start_timer!(|| _message);
     for _ in 0..1000 {
@@ -101,7 +63,7 @@ fn random_multiplication_tests<F: Field, R: RngCore>(mut rng: R, type_name: Stri
     end_timer!(start);
 }
 
-fn random_addition_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
+pub(crate) fn random_addition_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
     let _message = format!("addition {}", type_name);
     let start = start_timer!(|| _message);
     for _ in 0..1000 {
@@ -127,7 +89,7 @@ fn random_addition_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
     end_timer!(start);
 }
 
-fn random_subtraction_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
+pub(crate) fn random_subtraction_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
     let _message = format!("subtraction {}", type_name);
     let start = start_timer!(|| _message);
     for _ in 0..1000 {
@@ -143,12 +105,12 @@ fn random_subtraction_tests<F: Field, R: RngCore>(mut rng: R, type_name: String)
         let mut t2 = t0; // (a - b) + (b - a) = 0
         t2.add_assign(&t1);
 
-        assert_eq!(t2.is_zero(), true);
+        assert!(t2.is_zero());
     }
     end_timer!(start);
 }
 
-fn random_negation_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
+pub(crate) fn random_negation_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
     let _message = format!("negation {}", type_name);
     let start = start_timer!(|| _message);
     for _ in 0..1000 {
@@ -157,12 +119,12 @@ fn random_negation_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
         b = b.neg();
         b.add_assign(&a);
 
-        assert_eq!(b.is_zero(), true);
+        assert!(b.is_zero());
     }
     end_timer!(start);
 }
 
-fn random_doubling_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
+pub(crate) fn random_doubling_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
     let _message = format!("doubling {}", type_name);
     let start = start_timer!(|| _message);
     for _ in 0..1000 {
@@ -176,7 +138,7 @@ fn random_doubling_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
     end_timer!(start);
 }
 
-fn random_squaring_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
+pub(crate) fn random_squaring_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
     let _message = format!("squaring {}", type_name);
     let start = start_timer!(|| _message);
     for _ in 0..1000 {
@@ -190,24 +152,7 @@ fn random_squaring_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
     end_timer!(start);
 }
 
-pub(crate) fn random_inversion_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
-    assert!(bool::from(F::zero().inv().is_none()));
-
-    let _message = format!("inversion {}", type_name);
-    let start = start_timer!(|| _message);
-    for _ in 0..1000 {
-        let mut a = F::random_unsafe(&mut rng);
-        if a.is_zero() {
-            a = F::one();
-        }
-        let b = a.inv().unwrap(); // probabilistically nonzero
-        a.mul_assign(&b);
-        assert_eq!(a, F::one());
-    }
-    end_timer!(start);
-}
-
-fn random_expansion_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
+pub(crate) fn random_expansion_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
     let _message = format!("expansion {}", type_name);
     let start = start_timer!(|| _message);
     for _ in 0..1000 {
@@ -242,7 +187,7 @@ fn random_expansion_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
     end_timer!(start);
 }
 
-fn random_serde_tests<F: Field + FieldSerde, R: RngCore>(mut rng: R, type_name: String) {
+pub(crate) fn random_serde_tests<F: Field + FieldSerde, R: RngCore>(mut rng: R, type_name: String) {
     let _message = format!("serde {}", type_name);
     let start = start_timer!(|| _message);
     for _ in 0..1000 {
@@ -258,7 +203,7 @@ fn random_serde_tests<F: Field + FieldSerde, R: RngCore>(mut rng: R, type_name: 
     end_timer!(start);
 }
 
-fn associativity_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
+pub(crate) fn associativity_tests<F: Field, R: RngCore>(mut rng: R, type_name: String) {
     let _message = format!("associativity {}", type_name);
     let start = start_timer!(|| _message);
     for _ in 0..1000 {
