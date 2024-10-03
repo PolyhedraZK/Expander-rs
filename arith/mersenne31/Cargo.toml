@@ -7,15 +7,8 @@ edition = "2021"
 arith = { path = "../" }
 
 ark-std.workspace = true
-halo2curves.workspace = true
-log.workspace = true
-rand.workspace = true
-sha2.workspace = true
-thiserror.workspace = true
 ethnum.workspace = true
-
-raw-cpuid = "11.1.0"
-cfg-if = "1.0"
+rand.workspace = true
 
 
 [dev-dependencies]

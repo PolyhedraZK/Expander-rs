@@ -1,0 +1,14 @@
+[package]
+name = "circuit"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+arith = { path = "../arith" }
+config = { path = "../config" }
+transcript = { path = "../transcript" }
+
+ark-std.workspace = true
+ethnum.workspace = true
+log.workspace = true
+thiserror.workspace = true

@@ -1,0 +1,22 @@
+[package]
+name = "basefold"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+arith = { path = "../arith" }
+babybear = { path = "../arith/babybear" }
+# poseidon = { path = "../poseidon" }
+transcript = { path = "../transcript" }
+tree = { path = "../tree" }
+mpoly = { path = "../arith/mpoly" }
+
+ark-std.workspace = true
+# p3-baby-bear.workspace = true
+# p3-dft.workspace = true
+# p3-field.workspace = true
+# p3-matrix.workspace = true
+# p3-monty-31.workspace = true
+plonky2_util.workspace = true
+rand.workspace = true
+# rayon.workspace = true

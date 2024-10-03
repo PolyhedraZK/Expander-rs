@@ -6,7 +6,7 @@ use field::{
 };
 use rand::RngCore;
 
-use crate::{ExtensionField, Field, FieldSerde, SimdField};
+use crate::{ExtensionField, FFTField, Field, FieldSerde, SimdField};
 
 #[cfg(test)]
 mod bn254;
@@ -177,4 +177,135 @@ pub fn random_simd_field_tests<F: SimdField>(_name: String) {
         let x_repacked = F::pack(&scalars);
         assert_eq!(x, x_repacked);
     }
+}
+
+pub fn random_fft_field_tests<F: Field + FFTField>(_name: String) {
+    let mut rng = test_rng();
+
+    // let omega = F::ROOT_OF_UNITY;
+    // let omega_inv = omega.inv().unwrap();
+    for log_degree in [2, 3, 5, 10] {
+        let degree = 1 << log_degree;
+        let omega = F::two_adic_generator(log_degree);
+        let omega_inv = omega.inv().unwrap();
+
+        {
+            // (x+1)(x^2-1) = x^3 + x^2 - x - 1
+            let mut a = vec![F::zero(); degree];
+            let mut b = vec![F::zero(); degree];
+            let mut c = vec![F::zero(); degree];
+            a[0] = F::one();
+            a[1] = F::one();
+            b[0] = -F::one();
+            b[2] = F::one();
+            c[0] = -F::one();
+            c[1] = -F::one();
+            c[2] = F::one();
+            c[3] = F::one();
+
+            F::fft_in_place(&mut a, &omega);
+            F::fft_in_place(&mut b, &omega);
+
+            a.iter_mut().zip(b.iter()).for_each(|(a, b)| {
+                *a = *a * *b;
+            });
+
+            F::ifft_in_place(&mut a, &omega_inv);
+
+            assert_eq!(a, c);
+        }
+
+        {
+            // (x^(n-1) + 1) * (x + 1) = x^(n-1) + x + 2
+            let mut a = vec![F::zero(); degree];
+            let mut b = vec![F::zero(); degree];
+            let mut c = vec![F::zero(); degree];
+            a[0] = F::one();
+            a[degree - 1] = F::one();
+            b[0] = F::one();
+            b[1] = F::one();
+            c[0] = F::from(2);
+            c[1] = F::one();
+            c[degree - 1] = F::one();
+
+            F::fft_in_place(&mut a, &omega);
+            F::fft_in_place(&mut b, &omega);
+
+            a.iter_mut().zip(b.iter()).for_each(|(a, b)| {
+                *a = *a * *b;
+            });
+
+            F::ifft_in_place(&mut a, &omega_inv);
+
+            assert_eq!(a, c);
+        }
+    }
+
+    for i in [1, 2, 3, 5, 10] {
+        let omega = F::two_adic_generator(i);
+        let omega_inv = omega.inv().unwrap();
+
+        let degree = 1 << i;
+
+        let mut a = vec![F::zero(); degree];
+        let mut b = vec![F::zero(); degree];
+
+        for i in 0..degree {
+            a[i] = F::random_unsafe(&mut rng);
+            b[i] = F::random_unsafe(&mut rng);
+        }
+
+        let mut a2 = a.clone();
+
+        F::fft_in_place(&mut a2, &omega);
+        let mut a_add_b = a2.clone();
+        let mut a_mul_b = a2.clone();
+
+        F::ifft_in_place(&mut a2, &omega_inv);
+        assert_eq!(a, a2);
+
+        let mut b2 = b.clone();
+
+        F::fft_in_place(&mut b2, &omega);
+        a_add_b.iter_mut().zip(b2.iter()).for_each(|(c, b)| *c += b);
+        a_mul_b.iter_mut().zip(b2.iter()).for_each(|(c, b)| *c *= b);
+
+        F::ifft_in_place(&mut b2, &omega_inv);
+        assert_eq!(b, b2);
+
+        F::ifft_in_place(&mut a_add_b, &omega_inv);
+        let a_add_b_2 = a
+            .iter()
+            .zip(b.iter())
+            .map(|(&a, &b)| a + b)
+            .collect::<Vec<_>>();
+        assert_eq!(a_add_b, a_add_b_2);
+
+        F::ifft_in_place(&mut a_mul_b, &omega_inv);
+        let a_mul_b_2 = schoolbook_mul(&a, &b);
+        assert_eq!(a_mul_b, a_mul_b_2);
+    }
+}
+
+/// school book multiplication
+/// output = a(x) * b(x) mod x^N - 1 mod MODULUS
+/// using school-book multiplications
+/// This is used to verify the correctness of the FFT multiplication
+fn schoolbook_mul<F: Field>(a: &[F], b: &[F]) -> Vec<F> {
+    let degree = a.len();
+    assert_eq!(degree, b.len());
+
+    let mut buf = vec![F::ZERO; degree << 1];
+
+    for i in 0..degree {
+        for j in 0..degree {
+            buf[i + j] += a[i] * b[j];
+        }
+    }
+
+    for i in 0..degree {
+        buf[i] = buf[i] + buf[i + degree];
+    }
+    buf.truncate(degree);
+    buf
 }

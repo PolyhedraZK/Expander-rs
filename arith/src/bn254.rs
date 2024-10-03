@@ -5,7 +5,7 @@ use halo2curves::{bn256::Fr, ff::PrimeField};
 use rand::RngCore;
 
 use crate::serde::{FieldSerdeError, FieldSerdeResult};
-use crate::{ExtensionField, Field, FieldForECC, FieldSerde, SimdField};
+use crate::{ExtensionField, FFTField, Field, FieldForECC, FieldSerde, SimdField};
 
 const MODULUS: ethnum::U256 = ethnum::U256([
     0x2833e84879b9709143e1f593f0000001,
@@ -84,8 +84,8 @@ impl Field for Fr {
     }
 
     /// Exp
-    fn exp(&self, _exponent: u128) -> Self {
-        unimplemented!()
+    fn exp(&self, exp: u128) -> Self {
+        self.pow_vartime(&[exp as u64])
     }
 
     /// find the inverse of the element; return None if not exist
@@ -197,5 +197,27 @@ impl ExtensionField for Fr {
     /// Multiply the extension field by x, i.e, 0 + x + 0 x^2 + 0 x^3 + ...
     fn mul_by_x(&self) -> Self {
         unimplemented!("mul_by_x for Fr doesn't make sense")
+    }
+}
+
+impl FFTField for Fr {
+    const TWO_ADICITY: u32 = <Fr as PrimeField>::S;
+
+    #[inline]
+    fn root_of_unity() -> Self {
+        <Fr as PrimeField>::ROOT_OF_UNITY
+    }
+
+    /// Returns a generator of the multiplicative group of order `2^bits`.
+    /// Assumes `bits < TWO_ADICITY`, otherwise the result is undefined.
+    #[must_use]
+    fn two_adic_generator(bits: usize) -> Self {
+        let mut res = <Self as FFTField>::root_of_unity();
+        for _ in bits..Self::TWO_ADICITY as usize {
+            res = res.square();
+        }
+
+        res
+        // <Self as FFTField>::ROOT_OF_UNITY.pow_vartime(&[Self::TWO_ADICITY as u64 - bits as u64])
     }
 }

@@ -1,0 +1,14 @@
+[package]
+name = "babybear"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+arith = {path = "../"}
+
+ark-std.workspace = true
+ethnum.workspace = true
+p3-baby-bear.workspace = true
+p3-field.workspace = true
+p3-monty-31.workspace = true
+rand.workspace = true

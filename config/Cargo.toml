@@ -1,0 +1,21 @@
+[package]
+name = "config"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+arith = { path = "../arith" }
+babybear = { path = "../arith/babybear" }
+gf2 = { path = "../arith/gf2" }
+gf2_128 = { path = "../arith/gf2_128" }
+mersenne31 = { path = "../arith/mersenne31" }
+transcript = { path = "../transcript" }
+
+
+halo2curves.workspace = true
+mpi.workspace = true
+
+[features]
+default = []
+# default = [ "grinding" ]
+grinding = []

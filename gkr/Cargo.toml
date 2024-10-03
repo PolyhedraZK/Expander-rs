@@ -1,0 +1,60 @@
+[package]
+name = "gkr"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+arith = { path = "../arith" }
+config = { path = "../config" }
+circuit = { path = "../circuit" }
+gf2 = { path = "../arith/gf2" }
+gf2_128 = { path = "../arith/gf2_128" }
+mersenne31 = { path = "../arith/mersenne31" }
+sumcheck = { path = "../sumcheck" }
+transcript = { path = "../transcript" }
+
+ark-std.workspace = true
+clap.workspace = true
+env_logger.workspace = true
+log.workspace = true
+mpi.workspace = true
+rand.workspace = true
+sha2.workspace = true
+halo2curves.workspace = true
+thiserror.workspace = true
+ethnum.workspace = true
+
+# for the server
+bytes.workspace = true
+tokio.workspace = true
+warp.workspace = true
+chrono.workspace = true
+tynm.workspace = true
+tiny-keccak.workspace = true
+
+[dev-dependencies]
+criterion = "0.5.1"
+
+[[bin]]
+name = "expander-rs-mpi"
+path = "src/main_mpi.rs"
+
+[[bin]]
+name = "expander-exec"
+path = "src/exec.rs"
+
+[[bin]]
+name = "dev-setup"
+path = "src/utils.rs"
+
+[features]
+default = []
+# default = [ "grinding" ]
+grinding = [ "config/grinding" ]
+
+
+[[bench]]
+name = "gkr-hashes"
+harness = false
+path = "benches/gkr_hashes.rs"
+

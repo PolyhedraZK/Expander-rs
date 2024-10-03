@@ -2,7 +2,7 @@ use tiny_keccak::{Hasher, Sha3};
 
 use super::FiatShamirHash;
 
-#[derive(Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Keccak256hasher {}
 
 impl FiatShamirHash for Keccak256hasher {

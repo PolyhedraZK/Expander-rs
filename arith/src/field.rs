@@ -74,7 +74,7 @@ pub trait Field:
     fn random_bool(rng: impl RngCore) -> Self;
 
     // ====================================
-    //    #[inline(always)]
+    #[inline(always)]
     fn square(&self) -> Self {
         *self * *self
     }
@@ -130,5 +130,6 @@ pub trait FieldForECC: Field + Hash + Eq + PartialOrd + Ord {
     fn modulus() -> ethnum::U256;
 
     fn from_u256(x: ethnum::U256) -> Self;
+
     fn to_u256(&self) -> ethnum::U256;
 }

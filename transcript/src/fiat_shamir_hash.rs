@@ -1,10 +1,12 @@
+use std::fmt::Debug;
+
 pub mod sha2_256;
 pub use sha2_256::*;
 
 pub mod keccak_256;
 pub use keccak_256::*;
 
-pub trait FiatShamirHash {
+pub trait FiatShamirHash: Debug + Clone {
     /// The size of the hash output in bytes.
     const DIGEST_SIZE: usize;
 

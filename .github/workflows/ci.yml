@@ -18,6 +18,8 @@ jobs:
       - run: python3 ./scripts/install.py
       - run: cargo fmt --all -- --check
       - run: cargo clippy --all
+        env:
+          RUSTFLAGS: "-Dwarnings -C target-cpu=native -C target-feature=+avx512f"
 
   build-and-test:
     name: Build and Test (${{ matrix.os }}${{ matrix.feature != '' && format(', {0}', matrix.feature) || '' }})
@@ -85,4 +87,4 @@ jobs:
         run: |
           python3 ./scripts/install.py
           cargo run --bin=dev-setup --release
-          cargo run --release -- -t ${{ matrix.os == 'macos-latest' && 2 || 16 }} -f ${{ matrix.field }}
+          cargo run --bin=gkr --release -- -t ${{ matrix.os == 'macos-latest' && 2 || 16 }} -f ${{ matrix.field }}

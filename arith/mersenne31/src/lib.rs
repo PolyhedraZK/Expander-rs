@@ -9,8 +9,8 @@ mod m31x16;
 pub use m31x16::M31x16;
 
 /// Degree 3 extension field for Mersenne-31
-mod m31_ext;
-pub use m31_ext::M31Ext3;
+mod m31_ext3;
+pub use m31_ext3::M31Ext3;
 
 /// SIMDx16 for Degree 3 extension field for Mersenne-31
 mod m31_ext3x16;

@@ -26,6 +26,6 @@ harness = false
 
 [features]
 default = [ 
-    "ark-std/print-trace",
+    # "ark-std/print-trace",
     "ark-ec/parallel",
     ]
