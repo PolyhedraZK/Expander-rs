@@ -13,6 +13,7 @@ use gkr::{
     utils::{
         KECCAK_BN254_CIRCUIT, KECCAK_BN254_WITNESS, KECCAK_GF2_CIRCUIT, KECCAK_GF2_WITNESS,
         KECCAK_M31_CIRCUIT, KECCAK_M31_WITNESS, POSEIDON_BN254_CIRCUIT, POSEIDON_M31_CIRCUIT,
+        TRIVIAL_BN254_CIRCUIT,
     },
     Prover,
 };
@@ -54,6 +55,10 @@ fn main() {
                 &args,
                 Config::<M31ExtConfigSha2>::new(GKRScheme::GkrSquare, mpi_config.clone()),
             ),
+            "trivial" => run_benchmark::<M31ExtConfigSha2>(
+                &args,
+                Config::<M31ExtConfigSha2>::new(GKRScheme::Vanilla, mpi_config.clone()),
+            ),
             _ => unreachable!(),
         },
         "fr" => match args.scheme.as_str() {
@@ -64,6 +69,10 @@ fn main() {
             "poseidon" => run_benchmark::<BN254ConfigSha2>(
                 &args,
                 Config::<BN254ConfigSha2>::new(GKRScheme::GkrSquare, mpi_config.clone()),
+            ),
+            "trivial" => run_benchmark::<BN254ConfigSha2>(
+                &args,
+                Config::<BN254ConfigSha2>::new(GKRScheme::Vanilla, mpi_config.clone()),
             ),
             _ => unreachable!(),
         },
@@ -102,7 +111,10 @@ fn run_benchmark<C: GKRConfig>(args: &Args, config: Config<C>) {
             FieldType::M31 => Circuit::<C>::load_circuit(POSEIDON_M31_CIRCUIT),
             FieldType::BN254 => Circuit::<C>::load_circuit(POSEIDON_BN254_CIRCUIT),
         },
-
+        "trivial" => match C::FIELD_TYPE {
+            FieldType::BN254 => Circuit::<C>::load_circuit(TRIVIAL_BN254_CIRCUIT),
+            _ => unreachable!(),
+        },
         _ => unreachable!(),
     };
 
@@ -119,6 +131,8 @@ fn run_benchmark<C: GKRConfig>(args: &Args, config: Config<C>) {
         (FieldType::BN254, "keccak") => 2,
         (FieldType::M31, "poseidon") => 120,
         (FieldType::BN254, "poseidon") => 120,
+        (FieldType::M31, "trivial") => 1,
+        (FieldType::BN254, "trivial") => 1,
         _ => unreachable!(),
     };
 
@@ -173,6 +187,7 @@ fn print_info(args: &Args) {
     let prover = match args.scheme.as_str() {
         "keccak" => "GKR",
         "poseidon" => "GKR^2",
+        "trivial" => "GKR",
         _ => unreachable!(),
     };
 

@@ -39,6 +39,9 @@ pub const POSEIDON_BN254_CIRCUIT: &str = "data/poseidon_120_circuit_bn254.txt";
 pub const POSEIDON_BN254_URL: &str =
     "https://storage.googleapis.com/expander-compiled-circuits/poseidon-ci/poseidon_120_circuit_bn254.txt";
 
+pub const TRIVIAL_BN254_CIRCUIT: &str = "data/trivial_circuit_bn254.txt";
+pub const TRIVIAL_M31_CIRCUIT: &str = "data/trivial_circuit_m31.txt";
+
 // NOTE(Hang 08/23/24):
 // CI process is unhappy about reqwest as a dependency,
 // so we use wget as a backup option.
