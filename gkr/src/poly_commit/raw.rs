@@ -5,8 +5,7 @@ use std::io::{Read, Write};
 
 use arith::{Field, FieldSerde, FieldSerdeResult, SimdField};
 use config::{GKRConfig, MPIConfig};
-
-use crate::MultiLinearPoly;
+use polynomials::MultiLinearPoly;
 
 #[derive(Default)]
 pub struct RawOpening {}
@@ -71,10 +70,10 @@ impl<C: GKRConfig> RawCommitment<C> {
         x_simd: &[C::ChallengeField],
     ) -> C::ChallengeField {
         let mut scratch = vec![C::Field::default(); v.len()];
-        let y_simd = MultiLinearPoly::eval_circuit_vals_at_challenge::<C>(v, x, &mut scratch);
+        let y_simd = C::eval_circuit_vals_at_challenge(v, x, &mut scratch);
         let y_simd_unpacked = y_simd.unpack();
         let mut scratch = vec![C::ChallengeField::default(); y_simd_unpacked.len()];
-        MultiLinearPoly::eval_generic(&y_simd_unpacked, x_simd, &mut scratch)
+        MultiLinearPoly::evaluate_with_buffer(&y_simd_unpacked, x_simd, &mut scratch)
     }
 
     #[inline]
@@ -107,6 +106,6 @@ impl<C: GKRConfig> RawCommitment<C> {
             .collect::<Vec<C::ChallengeField>>();
 
         let mut scratch = vec![C::ChallengeField::default(); local_evals.len()];
-        y == MultiLinearPoly::eval_generic(&local_evals, x_mpi, &mut scratch)
+        y == MultiLinearPoly::evaluate_with_buffer(&local_evals, x_mpi, &mut scratch)
     }
 }

@@ -11,6 +11,7 @@ mersenne31 = { path = "../arith/mersenne31" }
 transcript = { path = "../transcript" }
 
 
+ark-std.workspace = true
 halo2curves.workspace = true
 mpi.workspace = true
 

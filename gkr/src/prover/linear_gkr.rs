@@ -3,7 +3,7 @@
 use ark_std::{end_timer, start_timer};
 use circuit::Circuit;
 use config::{Config, GKRConfig, GKRScheme, PolynomialCommitmentType};
-use sumcheck::GkrScratchpad;
+use sumcheck::ProverScratchPad;
 use transcript::{Proof, Transcript, TranscriptInstance};
 
 use crate::{gkr_prove, gkr_square_prove, RawCommitment};
@@ -42,7 +42,7 @@ pub(crate) fn grind<C: GKRConfig>(
 #[derive(Default)]
 pub struct Prover<C: GKRConfig> {
     config: Config<C>,
-    sp: GkrScratchpad<C>,
+    sp: ProverScratchPad<C>,
 }
 
 impl<C: GKRConfig> Prover<C> {
@@ -54,7 +54,7 @@ impl<C: GKRConfig> Prover<C> {
         );
         Prover {
             config: config.clone(),
-            sp: GkrScratchpad::default(),
+            sp: ProverScratchPad::default(),
         }
     }
     pub fn prepare_mem(&mut self, c: &Circuit<C>) {
@@ -70,7 +70,7 @@ impl<C: GKRConfig> Prover<C> {
             .map(|layer| layer.output_var_num)
             .max()
             .unwrap();
-        self.sp = GkrScratchpad::<C>::new(
+        self.sp = ProverScratchPad::<C>::new(
             max_num_input_var,
             max_num_output_var,
             self.config.mpi_config.world_size(),
@@ -79,7 +79,6 @@ impl<C: GKRConfig> Prover<C> {
 
     pub fn prove(&mut self, c: &mut Circuit<C>) -> (C::ChallengeField, Proof) {
         let timer = start_timer!(|| "prove");
-        // std::thread::sleep(std::time::Duration::from_secs(1)); // TODO
 
         // PC commit
         let commitment =

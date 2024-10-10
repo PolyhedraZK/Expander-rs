@@ -11,6 +11,8 @@ use crate::*;
 
 #[derive(Debug, Clone, Default)]
 pub struct StructureInfo {
+    // this var name is a bit misleading -- the power5 gate's max degree is > 1.
+    // this is really try to see if we need to use two phase GKR or not
     pub max_degree_one: bool,
 }
 
@@ -31,6 +33,7 @@ pub struct CircuitLayer<C: GKRConfig> {
 }
 
 impl<C: GKRConfig> CircuitLayer<C> {
+    #[inline]
     pub fn evaluate(
         &self,
         res: &mut Vec<C::SimdCircuitField>,
@@ -82,6 +85,7 @@ impl<C: GKRConfig> CircuitLayer<C> {
         }
     }
 
+    #[inline]
     pub fn identify_rnd_coefs(&mut self, rnd_coefs: &mut Vec<*mut C::CircuitField>) {
         for gate in &mut self.mul {
             if gate.coef_type == CoefType::Random {
@@ -105,6 +109,7 @@ impl<C: GKRConfig> CircuitLayer<C> {
         }
     }
 
+    #[inline]
     pub fn identify_structure_info(&mut self) {
         self.structure_info.max_degree_one = self.mul.is_empty();
     }

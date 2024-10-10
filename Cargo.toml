@@ -5,6 +5,7 @@ members = [
     "arith/gf2_128",
     "arith/goldilocks",
     "arith/mersenne31",
+    "arith/polynomials",
     "bi-kzg", 
     "circuit", 
     "config", 

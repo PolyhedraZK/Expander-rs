@@ -34,17 +34,21 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
+        with:
+          # The prefix cache key, this can be changed to start a new cache manually.
+          prefix-key: "mpi-v5.0.5" # update me if brew formula changes to a new version
       - name: Set RUSTFLAGS for AVX
         if: matrix.feature != ''
-        run: echo "RUSTFLAGS=$RUSTFLAGS -C target-feature=+${{ matrix.feature }}" >> $GITHUB_ENV
+        run: echo "RUSTFLAGS=$RUSTFLAGS -C target-feature=+${{ matrix.feature }}" >> $GITHUB_ENV  
       - name: Build and Test
         run: |
           python3 ./scripts/install.py
+          mpiexec --version
           cargo run --bin=dev-setup --release
           cargo build --all-features --release
           cargo test --all-features --release --workspace
 
-  benchmark:
+  gkr-e2e:
     name: Benchmark (${{ matrix.os }}${{ matrix.feature != '' && format(', {0}', matrix.feature) || '' }}, ${{ matrix.field }})
     runs-on: ${{ matrix.os }}
     strategy:
@@ -78,6 +82,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
+        with:
+          # The prefix cache key, this can be changed to start a new cache manually.
+          prefix-key: "mpi-v5.0.5" # update me if brew formula changes to a new version
       - name: Set RUSTFLAGS for AVX
         if: matrix.feature != ''
         run: echo "RUSTFLAGS=$RUSTFLAGS -C target-feature=+${{ matrix.feature }}" >> $GITHUB_ENV

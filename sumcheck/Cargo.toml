@@ -7,7 +7,8 @@ edition = "2021"
 arith = { path = "../arith" }
 circuit = { path = "../circuit" }
 config = { path = "../config" }
+polynomials = { path = "../arith/polynomials" }
 transcript = { path = "../transcript" }
 
-env_logger = "0.11.3"
-log = "0.4"
+env_logger.workspace = true
+log.workspace = true

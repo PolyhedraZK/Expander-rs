@@ -4,16 +4,15 @@ use arith::{Field, SimdField};
 use ark_std::{end_timer, start_timer};
 use circuit::Circuit;
 use config::{GKRConfig, MPIConfig};
-use sumcheck::{sumcheck_prove_gkr_layer, GkrScratchpad};
+use polynomials::MultiLinearPoly;
+use sumcheck::{sumcheck_prove_gkr_layer, ProverScratchPad};
 use transcript::{Transcript, TranscriptInstance};
-
-use crate::MultiLinearPoly;
 
 // FIXME
 #[allow(clippy::type_complexity)]
 pub fn gkr_prove<C: GKRConfig>(
     circuit: &Circuit<C>,
-    sp: &mut GkrScratchpad<C>,
+    sp: &mut ProverScratchPad<C>,
     transcript: &mut TranscriptInstance<C::FiatShamirHashType>,
     mpi_config: &MPIConfig,
 ) -> (
@@ -47,9 +46,8 @@ pub fn gkr_prove<C: GKRConfig>(
 
     let output_vals = &circuit.layers.last().unwrap().output_vals;
 
-    let claimed_v_simd =
-        MultiLinearPoly::eval_circuit_vals_at_challenge::<C>(output_vals, &rz0, &mut sp.hg_evals);
-    let claimed_v_local = MultiLinearPoly::eval_generic::<C::ChallengeField>(
+    let claimed_v_simd = C::eval_circuit_vals_at_challenge(output_vals, &rz0, &mut sp.hg_evals);
+    let claimed_v_local = MultiLinearPoly::<C::ChallengeField>::evaluate_with_buffer(
         &claimed_v_simd.unpack(),
         &r_simd,
         &mut sp.eq_evals_at_r_simd0,
@@ -59,7 +57,7 @@ pub fn gkr_prove<C: GKRConfig>(
         let mut claimed_v_gathering_buffer =
             vec![C::ChallengeField::zero(); mpi_config.world_size()];
         mpi_config.gather_vec(&vec![claimed_v_local], &mut claimed_v_gathering_buffer);
-        MultiLinearPoly::eval_generic(
+        MultiLinearPoly::evaluate_with_buffer(
             &claimed_v_gathering_buffer,
             &r_mpi,
             &mut sp.eq_evals_at_r_mpi0,
@@ -76,8 +74,8 @@ pub fn gkr_prove<C: GKRConfig>(
             &rz1,
             &r_simd,
             &r_mpi,
-            &alpha,
-            &beta,
+            alpha,
+            beta,
             transcript,
             sp,
             mpi_config,

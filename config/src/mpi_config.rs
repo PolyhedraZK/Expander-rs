@@ -1,13 +1,13 @@
 use std::fmt::Debug;
 
-use arith::Field;
+use arith::{Field, FieldSerde};
 use mpi::{
     environment::Universe,
     ffi,
     topology::{Process, SimpleCommunicator},
     traits::*,
 };
-use transcript::{FiatShamirHash, TranscriptInstance};
+use transcript::{FiatShamirHash, Transcript, TranscriptInstance};
 
 #[macro_export]
 macro_rules! root_println {
@@ -86,6 +86,7 @@ impl MPIConfig {
         }
     }
 
+    #[inline]
     pub fn finalize() {
         unsafe { ffi::MPI_Finalize() };
     }
@@ -113,6 +114,7 @@ impl MPIConfig {
         }
     }
 
+    #[inline]
     pub fn new_for_verifier(world_size: i32) -> Self {
         Self {
             universe: None,
@@ -123,11 +125,13 @@ impl MPIConfig {
     }
 
     /// Return an u8 vector sharing THE SAME MEMORY SLOT with the input.
+    #[inline]
     unsafe fn elem_to_u8_bytes<V: Sized>(elem: &V, byte_size: usize) -> Vec<u8> {
         Vec::<u8>::from_raw_parts((elem as *const V) as *mut u8, byte_size, byte_size)
     }
 
     /// Return an u8 vector sharing THE SAME MEMORY SLOT with the input.
+    #[inline]
     unsafe fn vec_to_u8_bytes<F: Field>(vec: &Vec<F>) -> Vec<u8> {
         Vec::<u8>::from_raw_parts(
             vec.as_ptr() as *mut u8,
@@ -136,9 +140,10 @@ impl MPIConfig {
         )
     }
 
+    #[inline]
     pub fn gather_vec<F: Field>(&self, local_vec: &Vec<F>, global_vec: &mut Vec<F>) {
         unsafe {
-            debug_assert!(global_vec.len() >= local_vec.len() * (self.world_size as usize));
+            assert!(global_vec.len() >= local_vec.len() * (self.world_size as usize));
             if self.world_size == 1 {
                 *global_vec = local_vec.clone()
             } else if self.world_rank == Self::ROOT_RANK {
@@ -157,6 +162,7 @@ impl MPIConfig {
     }
 
     /// broadcast root transcript state. incurs an additional hash if self.world_size > 1
+    #[inline]
     pub fn transcript_sync_up<H: FiatShamirHash>(&self, transcript: &mut TranscriptInstance<H>) {
         if self.world_size == 1 {
         } else {
@@ -166,6 +172,7 @@ impl MPIConfig {
     }
 
     /// Root process broadcase a value f into all the processes
+    #[inline]
     pub fn root_broadcast<F: Field>(&self, f: &mut F) {
         unsafe {
             if self.world_size == 1 {
@@ -178,6 +185,7 @@ impl MPIConfig {
     }
 
     /// sum up all local values
+    #[inline]
     pub fn sum_vec<F: Field>(&self, local_vec: &Vec<F>) -> Vec<F> {
         if self.world_size == 1 {
             local_vec.clone()
@@ -198,6 +206,7 @@ impl MPIConfig {
     }
 
     /// coef has a length of mpi_world_size
+    #[inline]
     pub fn coef_combine_vec<F: Field>(&self, local_vec: &Vec<F>, coef: &[F]) -> Vec<F> {
         if self.world_size == 1 {
             // Warning: literally, it should be coef[0] * local_vec
@@ -237,6 +246,22 @@ impl MPIConfig {
     #[inline(always)]
     pub fn root_process(&self) -> Process {
         self.world.unwrap().process_at_rank(Self::ROOT_RANK)
+    }
+
+    /// Transcript IO for MPI
+    #[inline]
+    pub fn transcript_io<F, H>(&self, ps: &[F], transcript: &mut TranscriptInstance<H>) -> F
+    where
+        F: Field + FieldSerde,
+        H: FiatShamirHash,
+    {
+        assert!(ps.len() == 3 || ps.len() == 4); // 3 for x, y; 4 for simd var
+        for p in ps {
+            transcript.append_field_element::<F>(p);
+        }
+        let mut r = transcript.generate_challenge::<F>();
+        self.root_broadcast(&mut r);
+        r
     }
 }
 

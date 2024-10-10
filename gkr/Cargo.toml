@@ -10,6 +10,7 @@ circuit = { path = "../circuit" }
 gf2 = { path = "../arith/gf2" }
 gf2_128 = { path = "../arith/gf2_128" }
 mersenne31 = { path = "../arith/mersenne31" }
+polynomials = { path = "../arith/polynomials" }
 sumcheck = { path = "../sumcheck" }
 transcript = { path = "../transcript" }
 

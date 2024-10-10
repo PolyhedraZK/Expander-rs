@@ -1,12 +1,13 @@
 mod sumcheck;
 pub use sumcheck::*;
 
-mod sumcheck_helper;
+mod prover_helper;
 
-mod sumcheck_square_helper;
-
-mod sumcheck_verifier_helper;
-pub use sumcheck_verifier_helper::*;
+mod verifier_helper;
+pub use verifier_helper::*;
 
 mod scratch_pad;
-pub use scratch_pad::GkrScratchpad;
+pub use scratch_pad::{ProverScratchPad, VerifierScratchPad};
+
+mod utils;
+pub use utils::*;

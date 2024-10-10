@@ -23,6 +23,7 @@ pub struct Segment<C: GKRConfig> {
 }
 
 impl<C: GKRConfig> Segment<C> {
+    #[inline]
     pub fn contain_gates(&self) -> bool {
         !self.gate_muls.is_empty()
             || !self.gate_adds.is_empty()
@@ -30,6 +31,7 @@ impl<C: GKRConfig> Segment<C> {
             || !self.gate_uni.is_empty()
     }
 
+    #[inline]
     pub fn scan_leaf_segments(
         &self,
         rc: &RecursiveCircuit<C>,
