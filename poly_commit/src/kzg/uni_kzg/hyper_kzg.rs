@@ -252,9 +252,7 @@ where
         tau,
         lagrange_eval,
         opening.quotient_delta_x_commitment,
-    );
-
-    true
+    )
 }
 
 pub fn multiple_points_batch_open_impl<E, PCS>(

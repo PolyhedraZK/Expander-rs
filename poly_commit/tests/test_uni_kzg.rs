@@ -3,7 +3,10 @@ mod common;
 use arith::{Field, Fr};
 use ark_std::test_rng;
 use gkr_engine::ExpanderPCS;
-use gkr_engine::{BN254Config, ExpanderSingleVarChallenge, MPIConfig, MPIEngine, Transcript};
+use gkr_engine::{BN254Config, ExpanderSingleVarChallenge, MPIConfig, MPIEngine, StructuredReferenceString, Transcript};
+use halo2curves::group::prime::PrimeCurveAffine;
+use halo2curves::group::Curve;
+use poly_commit::PolynomialCommitmentScheme;
 use gkr_hashers::Keccak256hasher;
 use halo2curves::bn256::Bn256;
 use poly_commit::HyperUniKZGPCS;
@@ -98,4 +101,46 @@ fn test_uni_kzg_batch_open() {
         BytesHashTranscript<Keccak256hasher>,
         HyperUniKZGPCS<Bn256>,
     >(true);
+}
+
+#[test]
+fn test_hyperkzg_rejects_corrupted_proof() {
+    let mut rng = test_rng();
+    let num_vars = 4;
+
+    let (srs, _) =
+        <HyperUniKZGPCS<Bn256> as PolynomialCommitmentScheme<Fr>>::gen_srs_for_testing(
+            &num_vars, &mut rng,
+        );
+    let (proving_key, verification_key) = srs.into_keys();
+
+    let poly = MultiLinearPoly::<Fr>::random(num_vars, &mut rng);
+    let x: Vec<Fr> = (0..num_vars).map(|_| Fr::random_unsafe(&mut rng)).collect();
+
+    let mut scratch_pad = ();
+    let commitment =
+        <HyperUniKZGPCS<Bn256> as PolynomialCommitmentScheme<Fr>>::commit(
+            &num_vars, &proving_key, &poly, &mut scratch_pad,
+        );
+
+    let mut transcript = BytesHashTranscript::<Keccak256hasher>::new();
+    let (eval, opening) = <HyperUniKZGPCS<Bn256> as PolynomialCommitmentScheme<Fr>>::open(
+        &num_vars, &proving_key, &poly, &x, &scratch_pad, &mut transcript,
+    );
+
+    // Valid proof should pass
+    let mut transcript_v = BytesHashTranscript::<Keccak256hasher>::new();
+    assert!(<HyperUniKZGPCS<Bn256> as PolynomialCommitmentScheme<Fr>>::verify(
+        &num_vars, &verification_key, &commitment, &x, eval, &opening, &mut transcript_v,
+    ));
+
+    // Corrupted proof should fail
+    let mut corrupted = opening.clone();
+    corrupted.quotient_delta_x_commitment =
+        (corrupted.quotient_delta_x_commitment.to_curve() * Fr::from(2u64)).to_affine();
+
+    let mut transcript_c = BytesHashTranscript::<Keccak256hasher>::new();
+    assert!(!<HyperUniKZGPCS<Bn256> as PolynomialCommitmentScheme<Fr>>::verify(
+        &num_vars, &verification_key, &commitment, &x, eval, &corrupted, &mut transcript_c,
+    ));
 }
