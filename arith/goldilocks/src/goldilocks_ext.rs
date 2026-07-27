@@ -380,23 +380,16 @@ impl GoldilocksExt2 {
         }
         let arr = self.v;
 
-        // z0 = DTH_ROOT^count = W^(k * count) where k = floor((p^D-1)/D)
-        let mut z0 = Goldilocks {
+        // For F[x]/(x^2 - W) where W is QNR, x^p = -x (since W^((p-1)/2) = -1)
+        // So frob(a0 + a1*x) = a0 + a1*(-x) = a0 - a1*x
+        // NEG_ONE = p - 1 = -1 mod p
+        const NEG_ONE: Goldilocks = Goldilocks {
             v: 18446744069414584320,
         };
-        for _ in 1..count {
-            z0 *= Goldilocks {
-                v: 18446744069414584320,
-            };
+
+        Self {
+            v: [arr[0], arr[1] * NEG_ONE],
         }
-        let z0square = z0 * z0;
-
-        let mut res = [Goldilocks::ZERO; 2];
-
-        res[0] = arr[0] * z0;
-        res[1] = arr[1] * z0square;
-
-        Self { v: res }
     }
 }
 
@@ -410,5 +403,49 @@ impl Mul<Goldilocksx8> for GoldilocksExt2 {
             c0: b_simd_ext.c0 * rhs,
             c1: b_simd_ext.c1 * rhs,
         }
+    }
+}
+
+#[cfg(test)]
+mod frobenius_tests {
+    use super::*;
+    use arith::Field;
+
+    #[test]
+    fn test_frobenius_squared_is_identity() {
+        // For degree-2 extension, frob^2 == identity
+        let a = GoldilocksExt2 {
+            v: [Goldilocks::from(123u32), Goldilocks::from(456u32)],
+        };
+        let frob1 = a.frobenius();
+        let frob2 = frob1.frobenius();
+        println!("a       = [{}, {}]", a.v[0].v, a.v[1].v);
+        println!("frob(a) = [{}, {}]", frob1.v[0].v, frob1.v[1].v);
+        println!("frob^2  = [{}, {}]", frob2.v[0].v, frob2.v[1].v);
+        assert_eq!(frob2, a, "frobenius^2 should equal identity");
+    }
+
+    #[test]
+    fn test_frobenius_fixes_base_field() {
+        // Frobenius should fix base field elements
+        let base = GoldilocksExt2 {
+            v: [Goldilocks::from(999u32), Goldilocks::ZERO],
+        };
+        let base_frob = base.frobenius();
+        println!("base       = [{}, {}]", base.v[0].v, base.v[1].v);
+        println!("frob(base) = [{}, {}]", base_frob.v[0].v, base_frob.v[1].v);
+        assert_eq!(base_frob, base, "frobenius should fix base field elements");
+    }
+
+    #[test]
+    fn test_frobenius_of_x_equals_neg_x() {
+        // For x^2 = 7 with 7 being QNR, frob(x) = -x
+        let x = GoldilocksExt2::X;
+        let frob_x = x.frobenius();
+        let neg_x = -x;
+        println!("X        = [{}, {}]", x.v[0].v, x.v[1].v);
+        println!("frob(X)  = [{}, {}]", frob_x.v[0].v, frob_x.v[1].v);
+        println!("-X       = [{}, {}]", neg_x.v[0].v, neg_x.v[1].v);
+        assert_eq!(frob_x, neg_x, "frobenius(X) should equal -X");
     }
 }
